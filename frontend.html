@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Question and Answer</title>
+    <style>
+        /* Add your CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .input-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        #send-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #chat {
+            border: 1px solid #ccc;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .user-message {
+            background-color: #007bff;
+            color: #fff;
+            padding: 5px 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            align-self: flex-end;
+        }
+
+        .bot-message {
+            background-color: #f0f0f0;
+            color: #333;
+            padding: 5px 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Document Question and Answer</h1>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Ask a question...">
+            <button id="send-button">Send</button>
+        </div>
+        <div id="chat"></div>
+    </div>
+    
+    <script>
+        // JavaScript code for handling user interactions and sending questions to the server
+        document.addEventListener("DOMContentLoaded", function () {
+            const chatContainer = document.getElementById("chat");
+            const userInput = document.getElementById("user-input");
+            const sendButton = document.getElementById("send-button");
+
+            // Function to add a message to the chat interface
+            function addMessage(message, isUser) {
+                const messageElement = document.createElement("div");
+                messageElement.classList.add(isUser ? "user-message" : "bot-message");
+                messageElement.textContent = message;
+                chatContainer.appendChild(messageElement);
+
+                // Scroll to the bottom of the chat
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            // Function to send the user's question to the server and receive a response
+            async function sendQuestion() {
+                const question = userInput.value;
+                if (question.trim() === "") return;
+
+                // Clear the input field
+                userInput.value = "";
+
+                // Add the user's question to the chat
+                addMessage(question, true);
+
+                // Send the question to the server (You can use fetch or other AJAX methods)
+                // Replace the URL below with the appropriate endpoint for sending questions to your server
+                const response = await fetch("{{ url_for('get_answer') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ question }),
+                });
+
+                if (response.ok) {
+                    const answer = await response.json();
+
+                    // Add the answer from the server to the chat
+                    addMessage(answer, false);
+                } else {
+                    console.error("Error fetching answer.");
+                }
+            }
+
+            // Event listener for the send button
+            sendButton.addEventListener("click", sendQuestion);
+        });
+    </script>
+</body>
+</html>
